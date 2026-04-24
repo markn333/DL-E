@@ -50,8 +50,9 @@ ANSWER_POINTER = "<<ANS>>"
 OCR_REPLACEMENTS = [
     # 解答ポインタ → マーカー
     (re.compile(r"[中ゆ呂必→ぷ品時時時かが時器が][ 　]*P\s*\d+"), ANSWER_POINTER),
-    # AI 表記の揺れを統一
-    (re.compile(r"A[lI!|][_ ]?(?=[ァ-ンー])"), "AI "),  # 「Al ブーム」→「AI ブーム」
+    # AI 表記の揺れを統一（「Al」「A!」「A|」「AlI」をすべて「AI」に）
+    (re.compile(r"\bAlI\b"), "AI"),
+    (re.compile(r"A[lI!|][_ ]?(?=[ァ-ンー])"), "AI "),
     (re.compile(r"\bA[lI!|]\b"), "AI"),
     # 選択肢直後の余計なアンダースコア（「A. _ シンボル」→「A. シンボル」）
     (re.compile(r"^([A-D])\.[ ]+_[ ]+", re.MULTILINE), r"\1. "),
@@ -60,6 +61,39 @@ OCR_REPLACEMENTS = [
     (re.compile(r"^[\[\|口](\| )?[ ]*(\d+)\.", re.MULTILINE), r"\2."),
     # 行頭の数字だけのページ番号行を削除
     (re.compile(r"^\d{1,3}\s*$", re.MULTILINE), ""),
+]
+
+# 書籍固有の誤字辞書（頻度が高いもののみ・安全な単純置換）
+BOOK_TYPO_FIXES = [
+    # 共通 OCR ノイズ
+    ("propblem", "problem"),
+    ("ブゾーム", "ブーム"),
+    ("AM 効果", "AI 効果"),
+    ("AM効果", "AI効果"),
+    ("層い AI", "弱い AI"),
+    ("でぐす", "です"),
+    ("ぐす 。", "す 。"),
+    ("ぐす。", "す。"),
+    ("タタスク", "タスク"),
+    ("(COC)", "(C)"),
+    ("(①D)", "(D)"),
+    ("AIl", "AI"),
+    ("A|", "AI"),
+    ("A!", "AI"),
+    # 固有名詞（AI 系略称）
+    ("OpenAl", "OpenAI"),
+    ("penAl", "penAI"),
+    ("Al Five", "AI Five"),
+    ("ChatAl", "ChatAI"),
+    ("Al ブーム", "AI ブーム"),
+    ("Al が", "AI が"),
+    ("Al の", "AI の"),
+    ("Al と", "AI と"),
+    ("Al を", "AI を"),
+    ("Al に", "AI に"),
+    ("Al は", "AI は"),
+    ("Al で", "AI で"),
+    ("Al が", "AI が"),
 ]
 
 # 漢字/カナ間の余計なスペース除去
@@ -75,6 +109,41 @@ def normalize_text(text: str) -> str:
         text = _RE_JP_SPACE.sub(r"\1", text)
     # 連続改行は2つまで
     text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
+# フィールド単位の最終クリーンアップ（改行を空白にした後に再適用する）
+_RE_JP_SPACE_ALL = re.compile(rf"({_JP_CHAR})[ 　]+({_JP_CHAR})")  # lookbehind 不要版
+# 日本語読点・句点の前のスペース除去
+_RE_PUNCT_SPACE = re.compile(rf"({_JP_CHAR})[ 　]+([、。）」])")
+# 開き括弧/カギの後のスペース除去
+_RE_OPEN_SPACE = re.compile(rf"([（「])[ 　]+({_JP_CHAR})")
+# 数字と「年/月/日/問/章/章目」の間のスペース除去
+_RE_NUM_UNIT = re.compile(r"(\d)[ 　]+(年|月|日|問|章|年代)")
+# 連続スペースを1つに
+_RE_MULTI_SPACE = re.compile(r"[ 　]{2,}")
+# 先頭の枠ゴミ / 番号ゴミ
+_RE_HEAD_NOISE = re.compile(r"^[\[\|口][\s\|]*[A-Za-z0-9]?\.?\s*")
+
+
+def final_clean(text: str) -> str:
+    """問題文・選択肢・解説の各フィールドに最終適用する正規化。"""
+    if not text:
+        return text
+    # 書籍固有の誤字修正
+    for src, dst in BOOK_TYPO_FIXES:
+        text = text.replace(src, dst)
+    # 漢字・かな間スペースを複数回適用で完全除去
+    for _ in range(6):
+        text = _RE_JP_SPACE_ALL.sub(r"\1\2", text)
+    text = _RE_PUNCT_SPACE.sub(r"\1\2", text)
+    text = _RE_OPEN_SPACE.sub(r"\1\2", text)
+    text = _RE_NUM_UNIT.sub(r"\1\2", text)
+    text = _RE_MULTI_SPACE.sub(" ", text)
+    # 前後空白
+    text = text.strip()
+    # 問題文先頭の枠ゴミ除去（例：「口 s 人工知能に…」→「人工知能に…」）
+    text = _RE_HEAD_NOISE.sub("", text)
     return text.strip()
 
 
@@ -310,10 +379,10 @@ def build(chapter: int, debug: bool = False) -> list[dict]:
                 "id": base_id + q.number,
                 "chapter": chapter,
                 "category": title,
-                "question": q.text,
-                "choices": [f"{k}. {v}" for k, v in sorted(q.choices.items())],
+                "question": final_clean(q.text),
+                "choices": [f"{k}. {final_clean(v)}" for k, v in sorted(q.choices.items())],
                 "answer": a.answer_letters if a else [],
-                "explanation": a.explanation if a else "",
+                "explanation": final_clean(a.explanation) if a else "",
                 "multiAnswer": q.multi_answer,
                 "_flags": flags,
             }
