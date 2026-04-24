@@ -1,0 +1,24 @@
+# 出題ソースPDF（Git管理対象外・容量大）
+*.pdf
+
+# OS / エディタ
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# Python（変換ツール用）
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# 中間生成物（必要に応じて見直し）
+build/
+dist/
+*.log
+
+# OCR モデル（容量大・別途DL）
+tessdata/

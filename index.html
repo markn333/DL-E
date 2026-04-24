@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a56db">
+  <title>OSS-DB Silver 模擬試験</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- ホーム画面 -->
+    <div id="screen-home" class="screen active">
+      <header class="app-header">
+        <h1>OSS-DB Silver</h1>
+        <p class="subtitle">模擬試験アプリ</p>
+      </header>
+
+      <div class="home-content">
+        <!-- 再開ボタン（中断データがある場合のみ表示） -->
+        <div id="resume-section" class="card hidden">
+          <h3>中断中の試験があります</h3>
+          <p id="resume-info"></p>
+          <div class="btn-group">
+            <button id="btn-resume" class="btn btn-primary">再開する</button>
+            <button id="btn-discard" class="btn btn-outline">破棄する</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>新しい試験を開始</h3>
+
+          <label class="form-label">問題数</label>
+          <div class="btn-group question-count-group">
+            <button class="btn btn-count active" data-count="10">10問</button>
+            <button class="btn btn-count" data-count="20">20問</button>
+            <button class="btn btn-count" data-count="50">50問</button>
+            <button class="btn btn-count" data-count="100">100問</button>
+          </div>
+
+          <label class="form-label">出題範囲</label>
+          <div class="category-select">
+            <label class="checkbox-label">
+              <input type="checkbox" id="cat-all" checked> すべて
+            </label>
+            <div id="category-list"></div>
+          </div>
+
+          <label class="form-label">出題モード</label>
+          <div class="btn-group mode-group">
+            <button class="btn btn-mode active" data-mode="random">ランダム</button>
+            <button class="btn btn-mode" data-mode="weak">苦手問題</button>
+            <button class="btn btn-mode" data-mode="sequential">順番通り</button>
+          </div>
+
+          <button id="btn-start" class="btn btn-primary btn-large">試験開始</button>
+        </div>
+
+        <div class="home-nav">
+          <button id="btn-go-history" class="btn btn-outline">学習履歴</button>
+          <button id="btn-go-weakness" class="btn btn-outline">弱点分析</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 試験画面 -->
+    <div id="screen-quiz" class="screen">
+      <header class="quiz-header">
+        <div class="quiz-progress">
+          <span id="quiz-current">1</span> / <span id="quiz-total">10</span>
+        </div>
+        <div class="quiz-progress-bar">
+          <div id="quiz-progress-fill" class="progress-fill"></div>
+        </div>
+        <button id="btn-pause" class="btn btn-small btn-outline">中断</button>
+      </header>
+
+      <div class="quiz-body">
+        <div class="question-card">
+          <div class="question-meta">
+            <span id="question-category" class="badge"></span>
+            <span id="question-multi" class="badge badge-info hidden">複数選択</span>
+          </div>
+          <p id="question-text" class="question-text"></p>
+        </div>
+
+        <div id="choices-list" class="choices-list"></div>
+
+        <div id="answer-section" class="answer-section hidden">
+          <div id="answer-result" class="answer-result"></div>
+          <div id="answer-explanation" class="explanation"></div>
+        </div>
+      </div>
+
+      <div class="quiz-footer">
+        <button id="btn-answer" class="btn btn-primary btn-large">解答する</button>
+        <button id="btn-next" class="btn btn-primary btn-large hidden">次の問題</button>
+      </div>
+    </div>
+
+    <!-- 結果画面 -->
+    <div id="screen-result" class="screen">
+      <header class="result-header">
+        <h2>試験結果</h2>
+      </header>
+      <div class="result-body">
+        <div class="result-score-card">
+          <div class="score-circle">
+            <svg viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="54" class="score-bg"/>
+              <circle id="score-ring" cx="60" cy="60" r="54" class="score-fg"/>
+            </svg>
+            <div class="score-text">
+              <span id="score-percent">0</span><span class="score-unit">%</span>
+            </div>
+          </div>
+          <p id="score-detail" class="score-detail"></p>
+        </div>
+
+        <div class="card">
+          <h3>カテゴリ別正解率</h3>
+          <div id="category-results"></div>
+        </div>
+
+        <div id="wrong-questions-section" class="card">
+          <h3>不正解の問題</h3>
+          <div id="wrong-questions-list"></div>
+        </div>
+
+        <div class="btn-group result-actions">
+          <button id="btn-retry-wrong" class="btn btn-outline">不正解のみ再挑戦</button>
+          <button id="btn-back-home" class="btn btn-primary">ホームに戻る</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 履歴画面 -->
+    <div id="screen-history" class="screen">
+      <header class="screen-header">
+        <button class="btn btn-back" id="btn-history-back">&larr;</button>
+        <h2>学習履歴</h2>
+      </header>
+      <div class="history-body">
+        <div class="card">
+          <h3>正解率の推移</h3>
+          <canvas id="history-chart"></canvas>
+        </div>
+        <div class="card">
+          <h3>学習統計</h3>
+          <div id="stats-summary"></div>
+        </div>
+        <div class="card">
+          <h3>過去の試験結果</h3>
+          <div id="history-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 弱点分析画面 -->
+    <div id="screen-weakness" class="screen">
+      <header class="screen-header">
+        <button class="btn btn-back" id="btn-weakness-back">&larr;</button>
+        <h2>弱点分析</h2>
+      </header>
+      <div class="weakness-body">
+        <div class="card">
+          <h3>カテゴリ別正解率</h3>
+          <canvas id="weakness-chart"></canvas>
+        </div>
+        <div class="card">
+          <h3>よく間違える問題 TOP10</h3>
+          <div id="weak-questions-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/chart.min.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/quiz.js"></script>
+  <script src="js/chart-helper.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
