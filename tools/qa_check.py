@@ -69,7 +69,8 @@ RE_PROPER_END = re.compile(
 )
 
 # 「最も適切なものを選べ」「2つ選べ」など問題末尾の典型語
-RE_QUESTION_TAIL = re.compile(r"(?:選べ|答えよ|示せ|述べよ)")
+# OCR 化けで「選べ→選ぶ／選ぴ／選ベ」になるパターンも許容
+RE_QUESTION_TAIL = re.compile(r"(?:選[べびぶぼベ]|答え[よるなる]|示[せす]|述べ)")
 
 # 半角ピリオド3つ以上連続（OCR ノイズ）
 RE_DOTS = re.compile(r"\.{3,}")

@@ -50,14 +50,14 @@
 
 ---
 
-## Phase 2: アプリの DL-E 化 ⬜
+## Phase 2: アプリの DL-E 化 ✅
 
-- [ ] `index.html`: title / h1 / subtitle を DL-E 用に変更
-- [ ] `manifest.json`: name / short_name / description / theme_color
-- [ ] `sw.js`: `CACHE_NAME` を `dle-quiz-v1` に変更
-- [ ] `js/storage.js`: `KEYS` を `dle_*` に変更
-- [ ] `icons/*.png`: 任意で差し替え
-- [ ] ローカル動作確認（`python -m http.server` 等）
+- [x] `index.html`: title / h1 / subtitle / theme-color を DL-E 用に変更
+- [x] `manifest.json`: name / short_name / description / theme_color
+- [x] `sw.js`: `CACHE_NAME` を `dle-quiz-v1` に変更
+- [x] `js/storage.js`: `KEYS` を `dle_*` に変更
+- [x] `start-server.bat` ローカル動作確認（port 8001）
+- [ ] `icons/*.png`: 任意で差し替え（DL-E ロゴ）
 
 ---
 
@@ -73,13 +73,33 @@
 
 ---
 
-## Phase 4: GitHub 公開 ⬜
+## Phase 4: GitHub 公開 ✅
 
-- [ ] `.gitignore` 作成（PDF 除外）
-- [ ] 著作権面の最終整理
-- [ ] GitHub リポジトリ作成 & 初回 push
-- [ ] GitHub Pages 設定
+- [x] `.gitignore` 作成（PDF / tessdata / build 除外）
+- [x] GitHub リポジトリ作成 & 初回 push: <https://github.com/markn333/DL-E>
+- [x] GitHub Pages 設定: <https://markn333.github.io/DL-E/>
 - [ ] 公開 URL から PWA インストール最終確認
+
+---
+
+## Phase 5: 手動レビュー（QA 結果より）
+
+### 自動 QA 検査結果（2026-04-27）
+- 全 409 問中 **要レビュー 166 問**（章別 id 連番は OK）
+- うち 103 問は解答ペアリング失敗（OCR 取りこぼし）
+- レビュー対象 → `build/review.csv` に出力済み
+
+### レビュー手順
+1. `python tools/export_review.py` → `build/review.csv` を出力
+2. CSV を Excel/VS Code 等で編集（PDF を見ながら正答・解説を補正）
+3. `python tools/import_review.py` → `data/questions.json` に反映（バックアップ自動作成）
+4. `python tools/qa_check.py` で再検証 → コミット & push
+
+### レビュー優先度
+- 高: NO_MATCH（解答が空、103 件）
+- 中: 選択肢ラベル欠損（answer ⊆ choices にない、8 件）
+- 中: 選択肢長アンバランス（17 件）
+- 低: 助詞連続（38 件、大半は元 OCR どおり）
 
 ---
 
