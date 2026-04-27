@@ -48,8 +48,10 @@ _JP_CHAR = r"[぀-ゟ゠-ヿ一-鿿㐀-䶿]"
 ANSWER_POINTER = "<<ANS>>"
 
 OCR_REPLACEMENTS = [
-    # 解答ポインタ → マーカー
-    (re.compile(r"[中ゆ呂必→ぷ品時時時かが時器が][ 　]*P\s*\d+"), ANSWER_POINTER),
+    # 解答ポインタ → マーカー（書籍の「→ Pxxx」記号が OCR でさまざまに化ける）
+    # 例: 「中 P17」「ゆ P19」「呂 P21」「→ P25」「必 P19」「ぷ P25」
+    #     「しっ P24 |」「[しっ P24 |」「[っ P274 |」
+    (re.compile(r"\[?[ぁ-ん一-鿿→]{1,3}[ 　]+P[ 　]*\d+[ 　]*[\|\]]?"), ANSWER_POINTER),
     # AI 表記の揺れを統一（「Al」「A!」「A|」「AlI」をすべて「AI」に）
     (re.compile(r"\bAlI\b"), "AI"),
     (re.compile(r"A[lI!|][_ ]?(?=[ァ-ンー])"), "AI "),
@@ -75,9 +77,14 @@ BOOK_TYPO_FIXES = [
     ("ぐす 。", "す 。"),
     ("ぐす。", "す。"),
     ("タタスク", "タスク"),
+    ("タタ スク", "タスク"),
+    ("データタサイエン", "データサイエン"),
     ("(COC)", "(C)"),
     ("(①D)", "(D)"),
     ("AIl", "AI"),
+    ("AlIC", "AIC"),       # 赤池情報量基準
+    ("AlIl", "AI"),
+    ("XAlI", "XAI"),       # 説明可能 AI
     ("A|", "AI"),
     ("A!", "AI"),
     # 固有名詞（AI 系略称）
@@ -122,14 +129,48 @@ _RE_OPEN_SPACE = re.compile(rf"([（「])[ 　]+({_JP_CHAR})")
 _RE_NUM_UNIT = re.compile(r"(\d)[ 　]+(年|月|日|問|章|年代)")
 # 連続スペースを1つに
 _RE_MULTI_SPACE = re.compile(r"[ 　]{2,}")
-# 先頭の枠ゴミ / 番号ゴミ
-_RE_HEAD_NOISE = re.compile(r"^[\[\|口][\s\|]*[A-Za-z0-9]?\.?\s*")
+# 解答ページのポインタゴミ（explanation 先頭に残りがち）
+#   例: 「[161」「[◆ 311」「た 2 P24 |」「| 」など
+_RE_PTR_HEAD_EXTRA = [
+    # 「(任意)P+数字(任意)」の形、仮名/記号含む
+    re.compile(r"^\s*[\[\|]?[^\n]{0,10}?P[ 　]*\d+[ 　]*[\|\]]?[ 　]*\n?"),
+    # 「[ 2-4桁数字 」の形（ページ番号直書き）
+    re.compile(r"^\s*\[[^\n]{0,3}?\d{2,4}[ 　]*[\|\]]?[ 　]*\n?"),
+    # 「| 」「|」単独の行頭
+    re.compile(r"^\s*\|[ 　]*\n?"),
+]
+
+# 先頭の枠ゴミ / 番号ゴミ:
+#   例: 「[| 1.」「[lio3.」「[Ll140.」「[| 1o.」「[| 9s.」「[| e.」「口 s」
+#       「jo 148.」「|] 25.」「[し L| 4.」「○ 231」「[|] 3.」など
+#   `[第N章` など漢字「第」始まりは保護（書籍内の章参照は稀に残る）
+NOISE_START = r"[\[\|口○●◆■□▲△▼▽]"
+_RE_HEAD_NOISE = re.compile(
+    r"^\s*"
+    r"(?:"
+    # パターン1: 枠記号 + (第で始まらない) + 20文字以内 + 英数字+「.」
+    # 番号部分は `1o`, `9s`, `e`, `Ll140` など OCR 化けしていても拾う
+    rf"{NOISE_START}+(?!第)"
+    r"[^。\n]{0,20}?[A-Za-z0-9]+\s*[\.。]\s*"
+    r"|"
+    # パターン2: 枠記号 + 空白 + 数字 + 空白（ピリオドなし、例「○ 231」）
+    rf"{NOISE_START}+\s+\d+\s+"
+    r"|"
+    # パターン3: 先頭に英小文字2〜3字 + 空白 + 数字 + . の頭ゴミ（「jo 148.」など）
+    r"[a-z]{2,3}\s+\d+\s*\.\s*"
+    r"|"
+    # パターン4: 「口 s」「口 2」みたいな四角枠誤認識（番号相当の英数字1〜2字）
+    r"口\s+[a-zA-Z0-9]{1,2}\s+"
+    r")"
+)
 
 
 def final_clean(text: str) -> str:
     """問題文・選択肢・解説の各フィールドに最終適用する正規化。"""
     if not text:
         return text
+    # 解答ポインタマーカーの残骸を掃除
+    text = text.replace(ANSWER_POINTER, " ")
     # 書籍固有の誤字修正
     for src, dst in BOOK_TYPO_FIXES:
         text = text.replace(src, dst)
@@ -142,9 +183,14 @@ def final_clean(text: str) -> str:
     text = _RE_MULTI_SPACE.sub(" ", text)
     # 前後空白
     text = text.strip()
-    # 問題文先頭の枠ゴミ除去（例：「口 s 人工知能に…」→「人工知能に…」）
-    text = _RE_HEAD_NOISE.sub("", text)
-    return text.strip()
+    # 問題文先頭の枠ゴミ除去（連続して残る場合があるので変化なくなるまでループ）
+    prev = None
+    while text != prev:
+        prev = text
+        text = _RE_HEAD_NOISE.sub("", text).strip()
+        for ptr_pat in _RE_PTR_HEAD_EXTRA:
+            text = ptr_pat.sub("", text).strip()
+    return text
 
 
 def collect_pages(start: int, end: int) -> str:
