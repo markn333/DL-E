@@ -1,4 +1,4 @@
-# DL-E 技術仕様
+# DL-G 技術仕様
 
 ## 1. アプリ全体構成
 
@@ -70,7 +70,7 @@ LocalStorage キー（※流用元命名のため要リネーム）:
 | `ossdb_progress` | 中断中試験のスナップショット |
 | `ossdb_wrong_stats` | 問題ごとの解答回数・誤答回数 |
 
-→ DL-E 用に `dle_*` 等へ rename 予定（既存ユーザーがいないので破壊的変更可）。
+→ DL-G 用に `dlg_*` 等へ rename 予定（既存ユーザーがいないので破壊的変更可）。
 
 ## 6. 画面遷移・操作（js/app.js）
 
@@ -83,7 +83,7 @@ LocalStorage キー（※流用元命名のため要リネーム）:
 - `sw.js` で `index.html` / CSS / JS / questions.json / manifest を install 時にキャッシュ
 - fetch ハンドラはキャッシュファースト + ネットワークフォールバック
 - ナビゲーションリクエストは `index.html` にフォールバック
-- ※キャッシュ名 `ossdb-quiz-v1` は DL-E 用に rename 予定
+- ※キャッシュ名 `ossdb-quiz-v1` は DL-G 用に rename 予定
 
 ## 8. 依存ライブラリ
 
@@ -91,17 +91,17 @@ LocalStorage キー（※流用元命名のため要リネーム）:
 |-----------|-----------|------|
 | Chart.js | min 同梱 | 履歴・弱点分析グラフ |
 
-## 9. 流用元との差分（DL-E 化に必要な変更）
+## 9. 流用元との差分（DL-G 化に必要な変更）
 
-| 対象 | 現状（OSS-DB Silver） | DL-E 化後 |
+| 対象 | 現状（OSS-DB Silver） | DL-G 化後 |
 |------|---------------------|-----------|
 | `index.html` `<title>` | OSS-DB Silver 模擬試験 | ディープラーニング G検定 模擬試験 |
-| `index.html` h1/subtitle | OSS-DB Silver | DL-E（G検定） |
-| `manifest.json` name/short_name/description/theme_color | OSS-DB | DL-E |
-| `sw.js` CACHE_NAME | `ossdb-quiz-v1` | `dle-quiz-v1` |
-| `storage.js` LocalStorage キー | `ossdb_*` | `dle_*` |
+| `index.html` h1/subtitle | OSS-DB Silver | DL-G（G検定） |
+| `manifest.json` name/short_name/description/theme_color | OSS-DB | DL-G |
+| `sw.js` CACHE_NAME | `ossdb-quiz-v1` | `dlg-quiz-v1` |
+| `storage.js` LocalStorage キー | `ossdb_*` | `dlg_*` |
 | `data/questions.json` | OSS-DB Silver の問題 | G検定問題（書籍から抽出） |
-| `icons/*.png` | 既存 | DL-E 用に差し替え（任意） |
+| `icons/*.png` | 既存 | DL-G 用に差し替え（任意） |
 
 ## 10. 出題データ生成パイプライン（要構築）
 

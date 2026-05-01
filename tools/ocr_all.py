@@ -1,4 +1,4 @@
-"""DL-E PDF 全ページ OCR バッチ。
+"""DL-G PDF 全ページ OCR バッチ。
 
 CLAUDE.md の長時間バッチ処理ルールに準拠:
 - 起動:  `python tools/ocr_all.py` または `tools/ocr_run.bat`
@@ -174,7 +174,7 @@ def cmd_run(start: int, end: int | None, force: bool, dpi: int) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="OCR all pages of the DL-E PDF.")
+    parser = argparse.ArgumentParser(description="OCR all pages of the DL-G PDF.")
     parser.add_argument("--start", type=int, default=0, help="開始ページ (0-indexed, default 0)")
     parser.add_argument("--end", type=int, default=None, help="終了ページ (exclusive, default = 全体)")
     parser.add_argument("--force", action="store_true", help="既存出力を無視して再OCR")

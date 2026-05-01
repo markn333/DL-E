@@ -53,7 +53,7 @@ def main() -> None:
         for f in q.get("_flags", []):
             slot[f] = slot.get(f, 0) + 1
 
-    lines = ["# DL-E questions レビューサマリ", ""]
+    lines = ["# DL-G questions レビューサマリ", ""]
     lines.append("| 章 | 問題数 | NEGATIVE | NO_ANSWER | NO_MATCH |")
     lines.append("|---|---:|---:|---:|---:|")
     tot = {"total": 0, "REVIEW_NEGATIVE": 0, "REVIEW_NO_ANSWER": 0, "REVIEW_NO_MATCH": 0}

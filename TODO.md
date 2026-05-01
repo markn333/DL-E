@@ -1,4 +1,4 @@
-# DL-E タスク一覧
+# DL-G タスク一覧
 
 最終更新: 2026-04-24
 
@@ -50,14 +50,14 @@
 
 ---
 
-## Phase 2: アプリの DL-E 化 ✅
+## Phase 2: アプリの DL-G 化 ✅
 
-- [x] `index.html`: title / h1 / subtitle / theme-color を DL-E 用に変更
+- [x] `index.html`: title / h1 / subtitle / theme-color を DL-G 用に変更
 - [x] `manifest.json`: name / short_name / description / theme_color
-- [x] `sw.js`: `CACHE_NAME` を `dle-quiz-v1` に変更
-- [x] `js/storage.js`: `KEYS` を `dle_*` に変更
+- [x] `sw.js`: `CACHE_NAME` を `dlg-quiz-v1` に変更
+- [x] `js/storage.js`: `KEYS` を `dlg_*` に変更
 - [x] `start-server.bat` ローカル動作確認（port 8001）
-- [ ] `icons/*.png`: 任意で差し替え（DL-E ロゴ）
+- [ ] `icons/*.png`: 任意で差し替え（DL-G ロゴ）
 
 ---
 
@@ -76,8 +76,8 @@
 ## Phase 4: GitHub 公開 ✅
 
 - [x] `.gitignore` 作成（PDF / tessdata / build 除外）
-- [x] GitHub リポジトリ作成 & 初回 push: <https://github.com/markn333/DL-E>
-- [x] GitHub Pages 設定: <https://markn333.github.io/DL-E/>
+- [x] GitHub リポジトリ作成 & 初回 push: <https://github.com/markn333/DL-G>
+- [x] GitHub Pages 設定: <https://markn333.github.io/DL-G/>
 - [ ] 公開 URL から PWA インストール最終確認
 
 ---

@@ -1,5 +1,5 @@
 @echo off
-REM DL-E OCR 停止: ocr_all.py を実行している python.exe を安全に終了
+REM DL-G OCR 停止: ocr_all.py を実行している python.exe を安全に終了
 REM コマンドライン文字列に "ocr_all.py" を含む python.exe のみを対象にする
 setlocal
 

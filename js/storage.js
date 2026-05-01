@@ -1,9 +1,9 @@
 // storage.js - LocalStorage persistence layer
 const Storage = {
   KEYS: {
-    HISTORY: 'dle_history',
-    PROGRESS: 'dle_progress',
-    WRONG_STATS: 'dle_wrong_stats',
+    HISTORY: 'dlg_history',
+    PROGRESS: 'dlg_progress',
+    WRONG_STATS: 'dlg_wrong_stats',
   },
 
   get(key) {

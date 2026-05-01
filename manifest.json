@@ -1,6 +1,6 @@
 {
-  "name": "DL-E ディープラーニング G検定 模擬試験",
-  "short_name": "DL-E",
+  "name": "DL-G ディープラーニング G検定 模擬試験",
+  "short_name": "DL-G",
   "description": "ディープラーニング G検定ジェネラリスト 試験対策 模擬試験アプリ",
   "start_url": "./index.html",
   "display": "standalone",

@@ -1,4 +1,4 @@
-# DL-E 実行計画
+# DL-G 実行計画
 
 ステータス: **承認済み**
 承認日: 2026-04-24
@@ -17,7 +17,7 @@
 ## 既存実装状況
 
 - OSSDB 模擬試験アプリの一式（PWA構成）が雛形としてコピー済み
-- DL-E 用の作り込みは未着手
+- DL-G 用の作り込みは未着手
   - タイトル・テーマカラー・キャッシュ名・LocalStorage キー名すべて OSS-DB のまま
   - `data/questions.json` は OSS-DB Silver の問題のまま
 - 出題ソース PDF（150MB）はプロジェクト直下に配置済み
@@ -46,13 +46,13 @@
 
 ---
 
-## Phase 2: アプリの DL-E 化（軽作業）
+## Phase 2: アプリの DL-G 化（軽作業）
 
-- [ ] `index.html` のタイトル/見出し/サブタイトルを DL-E 用に変更
+- [ ] `index.html` のタイトル/見出し/サブタイトルを DL-G 用に変更
 - [ ] `manifest.json` の name/short_name/description/theme_color を変更
-- [ ] `sw.js` の `CACHE_NAME` を `dle-quiz-v1` 等に変更
-- [ ] `js/storage.js` の `KEYS` を `dle_*` に変更
-- [ ] `icons/*.png` を DL-E 用に差し替え（任意・後回し可）
+- [ ] `sw.js` の `CACHE_NAME` を `dlg-quiz-v1` 等に変更
+- [ ] `js/storage.js` の `KEYS` を `dlg_*` に変更
+- [ ] `icons/*.png` を DL-G 用に差し替え（任意・後回し可）
 - [ ] 動作確認（ローカルサーバ → スマホ実機 PWA インストール）
 
 ---

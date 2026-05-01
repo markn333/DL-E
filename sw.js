@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dle-quiz-v1';
+const CACHE_NAME = 'dlg-quiz-v1';
 const ASSETS = [
   './',
   './index.html',

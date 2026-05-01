@@ -213,7 +213,7 @@ def main():
 
     # ---- レポート生成 ----
     lines: list[str] = []
-    lines.append("# DL-E questions.json 品質チェックレポート")
+    lines.append("# DL-G questions.json 品質チェックレポート")
     lines.append("")
     lines.append(f"- 対象: `data/questions.json`")
     lines.append(f"- 総問題数: **{len(data)}**")
